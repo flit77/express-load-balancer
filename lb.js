@@ -1,4 +1,6 @@
 const express = require('express');
+const fs = require('fs');
+const https = require('https');
 const request = require('request');
 const servers = ['http://localhost:3000', 'http://localhost:3001'];
 let cur = 0;
@@ -19,6 +21,7 @@ const handler = (req, res) => {
   cur = (cur + 1) % servers.length;
 };
 const server = express()
+  .use(require('express-sslify').HTTPS())
   .use(profilerMiddleware)
   .get('*', handler)
   .post('*', handler);
