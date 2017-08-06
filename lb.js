@@ -5,6 +5,11 @@ const request = require('request');
 const servers = ['http://localhost:3000', 'http://localhost:3001'];
 let cur = 0;
 
+const sslOptions = {
+  key: fs.readFileSync('./localhost.key'),
+  cert: fs.readFileSync('./localhost.cert')
+};
+
 const profilerMiddleware = (req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
@@ -20,10 +25,13 @@ const handler = (req, res) => {
   req.pipe(_req).pipe(res);
   cur = (cur + 1) % servers.length;
 };
-const server = express()
+
+const app = express()
   .use(require('express-sslify').HTTPS())
   .use(profilerMiddleware)
   .get('*', handler)
   .post('*', handler);
 
-server.listen(8080);
+app.listen(8080);
+
+https.createServer(sslOptions, app).listen(443);
